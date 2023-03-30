@@ -5,10 +5,10 @@ public class Quit implements Command {
     public String name() {
         return "quit";
     }
-    
+
     @Override
     public boolean run(Scanner scanner) {
-        System.out.println("Sortie du programme...");
+        System.out.println("Exiting program...");
         return true;
     }
 }
