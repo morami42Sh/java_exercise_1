@@ -2,57 +2,37 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Fibo implements Command {
+
+    // Implémentation de la méthode "name()" de l'interface "Command"
     @Override
     public String name() {
-        return "fibo";
+        return "fibo"; // Retourne le nom de la commande
     }
 
+    // Implémentation de la méthode "run()" de l'interface "Command"
     @Override
     public boolean run(Scanner sc) {
-        // Demander à l'utilisateur l'index n du nombre de Fibonacci
-        System.out.println("Please enter the index n of the Fibonacci number:");
-
+        System.out.println("Index fibonacci n = ?");
         try {
-            // Lire l'entrée de l'utilisateur sous forme d'un entier
-            int n = sc.nextInt();
-
-            // Vérifier si l'entrée est valide (n doit être supérieur à 2)
-            if (n < 2) {
-                System.out.println("n must be greater than 2!");
-                return false; // Retourner false pour indiquer que la commande n'a pas été exécutée avec succès
+            int i = sc.nextInt(); // Lit l'entrée utilisateur pour obtenir l'indice de Fibonacci à calculer
+            if(i < 2) {
+                System.out.println("n must be greater than 2 !"); // Vérifie que l'indice est supérieur à 2
+                sc.close(); // Ferme le scanner
+                return false; // Retourne "false" pour indiquer que la commande a échoué
             }
-
-            // Calculer le nombre de Fibonacci à l'index n
-            int fib = calculateFibonacci(n);
-
-            // Afficher le nombre de Fibonacci à l'utilisateur
-            System.out.println("The Fibonacci number at index " + n + " is " + fib);
-
+            int u = 1, v = 1;
+            for(int j = 2; j < i; j++) { // Calcul de l'indice de Fibonacci en utilisant une boucle "for"
+                int temp = u+v;
+                u = v;
+                v = temp;
+            }
+            System.out.println(v); // Affiche le résultat de l'indice de Fibonacci calculé
         } catch (InputMismatchException e) {
-            System.out.println("Invalid input! You need to input a valid integer.");
-            return false; // Retourner false pour indiquer que la commande n'a pas été exécutée avec succès
-        } finally {
-            // Fermer le scanner
-            sc.nextLine(); // Ajouter cette ligne pour consommer la fin de ligne qui suit l'entier lu avec nextInt()
-            sc.close();
+            System.out.println("You need to input a valid number"); // Gère l'exception si l'utilisateur entre autre chose qu'un nombre entier
         }
-
-        return false; // Retourner false pour indiquer que la commande n'a pas été exécutée avec succès
+        sc.close(); // Ferme le scanner
+        return false; // Retourne "false" pour indiquer que la commande a échoué
     }
 
-    private int calculateFibonacci(int n) {
-        // Initialiser les deux premiers nombres de Fibonacci
-        int fib1 = 0;
-        int fib2 = 1;
-
-        // Calculer les nombres de Fibonacci suivants jusqu'à atteindre l'index n
-        for (int i = 2; i <= n; i++) {
-            int fib = fib1 + fib2;
-            fib1 = fib2;
-            fib2 = fib;
-        }
-
-        // Retourner le nombre de Fibonacci à l'index n
-        return fib2;
-    }
 }
+

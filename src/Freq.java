@@ -1,82 +1,50 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.Map;
-
-import javax.swing.JFileChooser;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 public class Freq implements Command {
-
+    // Implémentation de la méthode "name()" de l'interface "Command"
     @Override
     public String name() {
-        return "freq";
+        return "freq"; // Retourne le nom de la commande
     }
 
+    // Implémentation de la méthode "run()" de l'interface "Command"
     @Override
-    public boolean run(Scanner sc) {
-        // Demander à l'utilisateur de choisir un fichier
-        System.out.println("Please choose a file:");
+    public boolean run(Scanner console) {
+        System.out.printf("Enter a path");
+        String path = console.nextLine(); // Lit l'entrée utilisateur pour obtenir le chemin d'accès au fichier
+        Path filepath = Paths.get(path);
 
         try {
-            // Lire le nom du fichier à partir de l'entrée de l'utilisateur
-            String filename = sc.nextLine();
-
-            // Lire le contenu du fichier dans une chaîne de caractères
-            String content = readFileAsString(filename);
-
-            // Extraire les mots de la chaîne de caractères, en supprimant la ponctuation et en convertissant en minuscules
-            String[] words = extractWords(content);
-
-            // Calculer la fréquence des mots
-            printTopWords(words);
-
+            String content = Files.readString(filepath); // Lit le contenu du fichier
+            freq(content); // Calcule la fréquence des mots dans le contenu du fichier
         } catch (IOException e) {
-            System.out.println("Error reading file: " + e.getMessage());
+            System.out.printf("Unreadable file: ");
+            e.printStackTrace(); // Gère l'exception si le fichier ne peut pas être lu
         }
-
-        return false; // Retourner false pour indiquer que la commande n'a pas été exécutée avec succès
+        return true; // Retourne "true" pour indiquer que la commande a réussi
     }
 
-    private String readFileAsString(String filename) throws IOException {
-        // Utiliser BufferedReader pour lire le fichier ligne par ligne
-        BufferedReader reader = new BufferedReader(new FileReader(filename));
-        StringBuilder sb = new StringBuilder();
+    // Méthode pour calculer la fréquence des mots dans une chaîne de caractères
+    public static void freq(String str){
+        str = str.replaceAll("[^A-Za-z0-9]+", " "); // Remplace tous les caractères qui ne sont pas des lettres ou des chiffres par un espace
+        str = str.toLowerCase(Locale.ROOT); // Convertit toutes les lettres en minuscules
+        List<String> arr = Arrays.asList(str.split(" ")); // Convertit la chaîne de caractères en une liste de mots
 
-        // Lire chaque ligne et ajouter à la chaîne de caractères
-        String line;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line).append("\n");
+        if (str.isBlank()) { // Vérifie si la chaîne de caractères est vide ou ne contient que des espaces
+            return;
         }
+        var freqMap = arr.stream()
+                .collect(Collectors.groupingBy(s->s, Collectors.counting())); // Calcule la fréquence des mots en utilisant les fonctions de flux
 
-        // Fermer le BufferedReader et retourner la chaîne de caractères résultante
-        reader.close();
-        return sb.toString();
-    }
-
-    private String[] extractWords(String content) {
-        // Remplacer tous les caractères qui ne sont pas des lettres ou des espaces par une chaîne vide
-        String cleaned = content.replaceAll("[^a-zA-Z\\s]", "");
-
-        // Diviser la chaîne nettoyée en mots individuels, en ignorant les espaces en blanc
-        String[] words = cleaned.toLowerCase().split("\\s+");
-
-        return words;
-    }
-
-    private void printTopWords(String[] words) {
-        // Calculer la fréquence des mots et trier par ordre décroissant de fréquence
-        Arrays.stream(words).collect(Collectors.groupingBy(w -> w, Collectors.counting()))
-                .entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed())
-                .limit(3)
-                // Afficher les trois mots les plus fréquents
-                .forEach((entry) -> System.out.println(entry.getKey() + ": " + entry.getValue()));
+        List<String> li = null;
+        var max3 = freqMap.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed()).limit(3); // Récupère les 3 mots les plus fréquents
+        String l = max3.map(Map.Entry::getKey).collect(Collectors.joining(" ")); // Concatène les mots avec un espace entre eux
+        System.out.printf(l + "\n"); // Affiche les 3 mots les plus fréquents
     }
 }
+

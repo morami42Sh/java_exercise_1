@@ -3,6 +3,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 
 public class Predict implements Command {
@@ -14,110 +15,61 @@ public class Predict implements Command {
 
     @Override
     public boolean run(Scanner sc) {
-        // Demander à l'utilisateur de choisir un fichier
-        System.out.println("Please choose a file:");
-
+        System.out.println("Choose a file !");
+        String chosen = "";
         try {
-            // Lire le nom du fichier à partir de l'entrée de l'utilisateur
-            String filename = sc.nextLine();
+            chosen = sc.nextLine();
 
-            // Lire le contenu du fichier dans une chaîne de caractères
-            String content = readFileAsString(filename);
-
-            // Extraire les mots de la chaîne de caractères, en supprimant la ponctuation et en convertissant en minuscules
-            String[] words = extractWords(content);
-
-            // Construire une table de transition de mots
-            Map<String, Map<String, Integer>> transitionTable = buildTransitionTable(words);
-
-            // Demander à l'utilisateur un mot de départ
-            System.out.println("Enter a starting word:");
-            String startingWord = sc.nextLine().toLowerCase();
-
-            // Générer une phrase à partir du mot de départ et de la table de transition
-            String sentence = generateSentence(transitionTable, startingWord);
-            System.out.println(sentence);
-
-        } catch (IOException e) {
-            System.out.println("Error reading file: " + e.getMessage());
-        }
-
-        return false; // Retourner false pour indiquer que la commande n'a pas été exécutée avec succès
-    }
-
-    private String readFileAsString(String filename) throws IOException {
-        // Lire le contenu du fichier en utilisant Files.readString()
-        return Files.readString(Paths.get(filename));
-    }
-
-    private String[] extractWords(String content) {
-        // Extraire les mots de la chaîne de caractères en utilisant la méthode split()
-        String[] words = content.replaceAll("[^a-zA-Z\\s]", "").toLowerCase().split("\\s+");
-        return words;
-    }
-
-    private Map<String, Map<String, Integer>> buildTransitionTable(String[] words) {
-        // Construire une table de transition de mots en utilisant une Map de Maps
-        Map<String, Map<String, Integer>> transitionTable = new HashMap<>();
-
-        for (int i = 0; i < words.length - 1; i++) {
-            String currentWord = words[i];
-            String nextWord = words[i + 1];
-
-            // Vérifier si la clé existe déjà dans la table de transition
-            if (!transitionTable.containsKey(currentWord)) {
-                transitionTable.put(currentWord, new HashMap<>());
+            // Lit le contenu du fichier et le transforme en tableau de mots en enlevant les caractères spéciaux
+            String a = Files.readString(Paths.get(chosen));
+            String[] words = a.replaceAll("[^a-zA-Z ]", "").toLowerCase().split(" ");
+            Map<String, Map<String, Integer>> m = new HashMap<>();
+            // Construit une carte des fréquences de tous les mots qui suivent chaque mot dans le texte
+            for (int i = 0; i < words.length - 1; i++) {
+                String str = words[i],
+                        next = words[i+1];
+                Map<String, Integer> m2 = m.get(str);
+                if(m2 == null) {
+                    m2 = new HashMap<>();
+                    m.put(str, m2);
+                    m2.put(next, 1);
+                    continue;
+                }
+                Integer j = m2.get(next);
+                if (j == null)
+                    m2.put(next, 1);
+                else
+                    m2.replace(next, j+1);
             }
-
-            Map<String, Integer> transitionCounts = transitionTable.get(currentWord);
-
-            // Incrémenter le compteur de transition pour le mot suivant
-            transitionCounts.put(nextWord, transitionCounts.getOrDefault(nextWord, 0) + 1);
-        }
-
-        return transitionTable;
-    }
-
-    private String generateSentence(Map<String, Map<String, Integer>> transitionTable, String startingWord) {
-        // Générer une phrase à partir d'un mot de départ et d'une table de transition de mots
-        StringBuilder sb = new StringBuilder();
-        String currentWord = startingWord;
-
-        // Ajouter le mot de départ à la phrase
-        sb.append(currentWord);
-
-        // Générer des mots suivants jusqu'à atte
-        int wordCount = 1; // Compteur de mots
-
-        while (transitionTable.containsKey(currentWord) && wordCount < 20) {
-            // Trouver la transition la plus probable pour le mot courant
-            String nextWord = null;
-            int maxCount = 0;
-
-            Map<String, Integer> transitionCounts = transitionTable.get(currentWord);
-
-            for (String word : transitionCounts.keySet()) {
-                int count = transitionCounts.get(word);
-                if (count > maxCount) {
-                    nextWord = word;
-                    maxCount = count;
+            // Demande à l'utilisateur un mot et trouve les mots les plus fréquents qui suivent ce mot dans le texte
+            System.out.println("Enter a word : ");
+            chosen = sc.nextLine();
+            if (!m.containsKey(chosen)) {
+                System.out.println("This word is not in the text !");
+                return false;
+            }
+            String next = chosen;
+            StringBuilder builder = new StringBuilder();
+            int length = 1;
+            while(m.containsKey(next) && length++ < 20) { // Cherche les 20 mots suivants les plus fréquents
+                Map<String, Integer> val = m.get(next);
+                Integer value = 0;
+                m.remove(next); // Évite les boucles infinies en supprimant le mot courant de la carte des fréquences
+                builder.append(" " + next);
+                for(Entry<String, Integer> e : val.entrySet()) {
+                    if(e.getValue() > value) {
+                        next = e.getKey();
+                        value = e.getValue();
+                    }
                 }
             }
-
-            if (nextWord == null) {
-                break;
-            }
-
-            // Ajouter le mot suivant à la phrase
-            sb.append(" ");
-            sb.append(nextWord);
-
-            // Passer au mot suivant
-            currentWord = nextWord;
-            wordCount++;
+            builder.append(' ' + next);
+            System.out.println("Most common sentence :" + builder.toString());
+        } catch (IOException e) {
+            System.out.println("Unreadable file : " + e.getClass() + " " + e.getMessage());
         }
-
-        // Retourner la phrase générée
-        return sb.toString();
+        return false;
     }
+
 }
+
