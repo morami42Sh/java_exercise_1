@@ -1,16 +1,13 @@
 import java.util.Scanner;
 
 public class Quit implements Command {
-    @Override
-    public String name() {
-        return "quit";
-    }
-
-    @Override
-    public boolean run(Scanner scanner) {
-        System.out.println("Exiting program...");
-        System.exit(0);
-        return false;
-    }
+@Override
+public String name() {
+return "quit";
 }
-
+@Override
+public boolean run(Scanner scanner) {
+    System.out.println("Exiting program...");
+    return true;
+}
+}
