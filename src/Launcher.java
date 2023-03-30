@@ -17,7 +17,7 @@ public class Launcher {
 				break;
 			}
 			if(cmd == null) {
-				System.out.println("Unkown command"); // Si la commande est invalide, afficher un message d'erreur
+				System.out.println("Unknown command"); // Si la commande est invalide, afficher un message d'erreur
 			}
 		} while(cmd == null || !cmd.run(sc)); // Tant que la commande est invalide ou n'est pas terminée, continuer la boucle
 		sc.close(); // Fermer le scanner
