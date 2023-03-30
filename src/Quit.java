@@ -1,12 +1,24 @@
-import java.util.Scanner;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 
-public class Quit implements Command {
-	public String name() {
-		return "quit";
-	}
+import static java.util.Comparator.comparing;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 
-	public boolean run(Scanner sc) {
-		return true;
-	}
+public class Quit implements Command
+{
+    @Override
+    public String name() {
+        return "quit";
+    }
+
+    @Override
+    public boolean run(Scanner scanner) {
+        return true;
+    }
+
+    
+    
 }
-
