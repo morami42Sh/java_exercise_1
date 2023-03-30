@@ -1,50 +1,67 @@
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Scanner;
 import java.util.stream.Collectors;
 
+import javax.swing.JFileChooser;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
+
 public class Freq implements Command {
-    // Implémentation de la méthode "name()" de l'interface "Command"
-    @Override
-    public String name() {
-        return "freq"; // Retourne le nom de la commande
-    }
+	// Méthode pour afficher les trois mots les plus fréquents dans un fichier choisi à l'aide d'une interface graphique
+	public static void freq2() throws IOException {
+		// Changer le look and feel pour une apparence plus agréable (Windows, Mac, etc.)
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+				| UnsupportedLookAndFeelException e) {
+			System.out.println("Couldnt change l&f :(");
+		}
+		// Ouvrir une fenêtre de sélection de fichier
+		JFileChooser chooser = new JFileChooser();
+		chooser.showOpenDialog(null);
+		// Lire le contenu du fichier sélectionné
+		FileInputStream in = new FileInputStream(chooser.getSelectedFile());
+		String a = new String(in.readAllBytes());
+		// Supprimer les caractères non alphabétiques et mettre tous les mots en minuscules
+		String[] words = a.replaceAll("[^a-zA-Z ]", "").toLowerCase().split(" ");
+		// Regrouper les mots en fonction de leur fréquence d'apparition et afficher les trois plus fréquents
+		Arrays.stream(words).filter((str) -> !str.isBlank())
+		.collect(Collectors.groupingBy((str) -> str)).entrySet().stream()
+		.sorted(Comparator.comparingInt((e) -> -e.getValue().size())).limit(3)
+		.forEach((str) -> System.out.print(str.getKey() + " "));
+		in.close();
+	}
 
-    // Implémentation de la méthode "run()" de l'interface "Command"
-    @Override
-    public boolean run(Scanner console) {
-        System.out.printf("Enter a path");
-        String path = console.nextLine(); // Lit l'entrée utilisateur pour obtenir le chemin d'accès au fichier
-        Path filepath = Paths.get(path);
+	@Override
+	public String name() {
+		return "freq";
+	}
 
-        try {
-            String content = Files.readString(filepath); // Lit le contenu du fichier
-            freq(content); // Calcule la fréquence des mots dans le contenu du fichier
-        } catch (IOException e) {
-            System.out.printf("Unreadable file: ");
-            e.printStackTrace(); // Gère l'exception si le fichier ne peut pas être lu
-        }
-        return true; // Retourne "true" pour indiquer que la commande a réussi
-    }
+	@Override
+	public boolean run(Scanner sc) {
+		System.out.println("Choose a file !");
+		String chosen = "";
+		try {
+			chosen = sc.next();
+			// Lire le contenu du fichier choisi
+			String a = Files.readString(Paths.get(chosen));
+			// Supprimer les caractères non alphabétiques et mettre tous les mots en minuscules
+			String[] words = a.replaceAll("[^a-zA-Z ]", "").toLowerCase().split(" ");
+			// Regrouper les mots en fonction de leur fréquence d'apparition et afficher les trois plus fréquents
+			Arrays.stream(words).filter((str) -> !str.isBlank())
+			.collect(Collectors.groupingBy((str) -> str)).entrySet().stream()
+			.sorted(Comparator.comparingInt((e) -> -e.getValue().size())).limit(3)
+			.forEach((str) -> System.out.print(str.getKey() + " "));
+		} catch (IOException e) {
+			System.out.println("Unreadable file : " + e.getClass() + " " + e.getMessage());
+		}
+		return false;
+	}
 
-    // Méthode pour calculer la fréquence des mots dans une chaîne de caractères
-    public static void freq(String str){
-        str = str.replaceAll("[^A-Za-z0-9]+", " "); // Remplace tous les caractères qui ne sont pas des lettres ou des chiffres par un espace
-        str = str.toLowerCase(Locale.ROOT); // Convertit toutes les lettres en minuscules
-        List<String> arr = Arrays.asList(str.split(" ")); // Convertit la chaîne de caractères en une liste de mots
-
-        if (str.isBlank()) { // Vérifie si la chaîne de caractères est vide ou ne contient que des espaces
-            return;
-        }
-        var freqMap = arr.stream()
-                .collect(Collectors.groupingBy(s->s, Collectors.counting())); // Calcule la fréquence des mots en utilisant les fonctions de flux
-
-        List<String> li = null;
-        var max3 = freqMap.entrySet().stream().sorted(Map.Entry.<String, Long>comparingByValue().reversed()).limit(3); // Récupère les 3 mots les plus fréquents
-        String l = max3.map(Map.Entry::getKey).collect(Collectors.joining(" ")); // Concatène les mots avec un espace entre eux
-        System.out.printf(l + "\n"); // Affiche les 3 mots les plus fréquents
-    }
 }
 
