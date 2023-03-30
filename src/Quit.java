@@ -7,7 +7,8 @@ public class Quit implements Command {
     }
 
     @Override
-    public boolean run(Scanner sc) {
+    public boolean run(Scanner scanner) {
+        System.out.println("Exiting program...");
         System.exit(0);
         return false;
     }
